@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client_core"
 }
 
 datasource db {
@@ -327,13 +328,29 @@ model StudentSemesterPayment {
   academicSemesterId String
   academicSemester   AcademicSemester @relation(fields: [academicSemesterId], references: [id])
 
-  fullPaymentAmount    Int?           @default(0)
-  partialPaymentAmount Int?           @default(0)
-  totalDueAmount       Int?           @default(0)
-  totalPaidAmount      Int?           @default(0)
-  paymentStatus        PaymentStatus? @default(PENDING)
+  fullPaymentAmount             Int?                            @default(0)
+  partialPaymentAmount          Int?                            @default(0)
+  totalDueAmount                Int?                            @default(0)
+  totalPaidAmount               Int?                            @default(0)
+  paymentStatus                 PaymentStatus?                  @default(PENDING)
+  StudentSemesterPaymentHistory StudentSemesterPaymentHistory[]
 
   @@map("student_semester_payments")
+}
+
+model StudentSemesterPaymentHistory {
+  id                       String                 @id @default(uuid())
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+  studentSemesterPayment   StudentSemesterPayment @relation(fields: [studentSemesterPaymentId], references: [id])
+  studentSemesterPaymentId String
+  transactionId            String
+  dueAmount                Int                    @default(0)
+  paidAmount               Int                    @default(0)
+  paymentMethod            PaymentMethod          @default(ONLINE)
+  isPaid                   Boolean?
+
+  @@map("student_semester_payment_histories")
 }
 
 model StudentAcademicInfo {
@@ -373,6 +390,11 @@ enum StudentEnrolledCourseStatus {
 enum ExamType {
   MIDTERM
   FINAL
+}
+
+enum PaymentMethod {
+  CASH
+  ONLINE
 }
 
 enum PaymentStatus {
